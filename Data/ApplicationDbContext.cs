@@ -11,7 +11,6 @@ namespace BugEyeD.Data
 		{
 		}
 
-		public virtual DbSet<BTUser> BTUsers { get; set; } = default!;
 		public virtual DbSet<Company> Companys { get; set; } = default!;
 		public virtual DbSet<Invite> Invites { get; set; } = default!;
 		public virtual DbSet<Notification> Notifications { get; set; } = default!;
