@@ -33,7 +33,7 @@ namespace BugEyeD.Models
 		[Display(Name = "Last Name")]
 		[StringLength(50, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
 		public string? InviteeLastName { get; set; }
-		[StringLength(500, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 0)]
+		[StringLength(500, ErrorMessage = "The {0} can only be max {1} characters long.", MinimumLength = 0)]
 		public string? Message { get; set; }
 
 		public bool IsValid { get; set; }

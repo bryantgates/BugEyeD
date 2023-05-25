@@ -9,7 +9,7 @@ namespace BugEyeD.Models
 		public int TicketId { get; set; }
 		[Display(Name = "Property Name")]
 		public string? PropertyName { get; set; }
-
+		[StringLength(500, ErrorMessage = "The {0} can only be max {1} characters long.", MinimumLength = 0)]
 		public string? Description { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime Created { get; set; }

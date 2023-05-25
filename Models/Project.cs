@@ -12,7 +12,6 @@ namespace BugEyeD.Models
 		[StringLength(50, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
 		public string? Name { get; set; }
 		[Required]
-		[StringLength(1000, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
 		public string? Description { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime Created { get; set; }

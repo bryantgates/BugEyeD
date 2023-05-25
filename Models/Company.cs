@@ -12,7 +12,7 @@ namespace BugEyeD.Models
 		[Display(Name = "Company Name")]
 		[StringLength(50, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
 		public string? Name { get; set; }
-		[StringLength(1000, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 0)]
+		[StringLength(1000, ErrorMessage = "The {0} can only be max {1} characters long.", MinimumLength = 0)]
 		public string? Description { get; set; }
 
 		[NotMapped]
