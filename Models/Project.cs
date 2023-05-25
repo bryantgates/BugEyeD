@@ -8,9 +8,12 @@ namespace BugEyeD.Models
 		public int Id { get; set; }
 		public int CompanyId { get; set; }
 		[Required]
-		public string Name { get; set; }
+		[Display(Name = "Project Name")]
+		[StringLength(50, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
+		public string? Name { get; set; }
 		[Required]
-		public string Description { get; set; }
+		[StringLength(1000, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
+		public string? Description { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime Created { get; set; }
 		[DataType(DataType.DateTime)]
@@ -20,15 +23,15 @@ namespace BugEyeD.Models
 		public int ProjectPriorityId { get; set; }
 
 		[NotMapped]
-		public IFormFile? ImageFile { get; set; }
-		public byte[]? ImageData { get; set; }
-		public string? ImageType { get; set; }
+		public IFormFile? ImageFormFile { get; set; }
+		public byte[]? ImageFileData { get; set; }
+		public string? ImageFileType { get; set; }
 
 		public bool Archived { get; set; }
 
 		// Navigation properties
-		public virtual Company Company { get; set; }
-		public virtual ProjectPriority ProjectPriority { get; set; }
+		public virtual Company? Company { get; set; }
+		public virtual ProjectPriority? ProjectPriority { get; set; }
 		public virtual ICollection<BTUser> Members { get; set; } = new HashSet<BTUser>();
 		public virtual ICollection<Ticket> Tickets { get; set; } = new HashSet<Ticket>();
 	}

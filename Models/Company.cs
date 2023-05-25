@@ -9,14 +9,16 @@ namespace BugEyeD.Models
 		public int Id { get; set; }
 
 		[Required]
-		public string Name { get; set; }
-
-		public string Description { get; set; }
+		[Display(Name = "Company Name")]
+		[StringLength(50, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
+		public string? Name { get; set; }
+		[StringLength(1000, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 0)]
+		public string? Description { get; set; }
 
 		[NotMapped]
-		public IFormFile? ImageFile { get; set; }
-		public byte[]? ImageData { get; set; }
-		public string? ImageType { get; set; }
+		public IFormFile? ImageFormFile { get; set; }
+		public byte[]? ImageFileData { get; set; }
+		public string? ImageFileType { get; set; }
 
 		// Navigation properties
 		public virtual ICollection<Project> Projects { get; set; } = new HashSet<Project>();

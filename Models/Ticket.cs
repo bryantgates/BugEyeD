@@ -7,10 +7,11 @@ namespace BugEyeD.Models
 		public int Id { get; set; }
 
 		[Required]
-		public string Title { get; set; }
+		public string? Title { get; set; }
 
 		[Required]
-		public string Description { get; set; }
+		[StringLength(500, ErrorMessage = "The {0} must be at least {2} and max {1} characters long.", MinimumLength = 2)]
+		public string? Description { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime Created { get; set; }
 		[DataType(DataType.DateTime)]
@@ -28,23 +29,23 @@ namespace BugEyeD.Models
 
 		public int TicketPriorityId { get; set; }
 
-		public string DeveloperUserId { get; set; }
+		public string? DeveloperUserId { get; set; }
 
 		[Required]
-		public string SubmitterUserId { get; set; }
+		public string? SubmitterUserId { get; set; }
 
 		// Navigation properties
-		public virtual Project Project { get; set; }
+		public virtual Project? Project { get; set; }
 
-		public virtual TicketPriority TicketPriority { get; set; }
+		public virtual TicketPriority? TicketPriority { get; set; }
 
-		public virtual TicketType TicketType { get; set; }
+		public virtual TicketType? TicketType { get; set; }
 
-		public virtual TicketStatus TicketStatus { get; set; }
+		public virtual TicketStatus? TicketStatus { get; set; }
 
-		public virtual BTUser DeveloperUser { get; set; }
+		public virtual BTUser? DeveloperUser { get; set; }
 
-		public virtual BTUser SubmitterUser { get; set; }
+		public virtual BTUser? SubmitterUser { get; set; }
 
 		public virtual ICollection<TicketComment> Comments { get; set; } = new HashSet<TicketComment>();
 
