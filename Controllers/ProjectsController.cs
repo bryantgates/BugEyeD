@@ -55,11 +55,20 @@ namespace BugEyeD.Controllers
             return View(project);
         }
 
-        // GET: Projects/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name");
-            return View();
+            if (User.IsInRole(nameof(BTRoles.Admin)) || User.IsInRole(nameof(BTRoles.ProjectManager)))
+            {
+                BTUser? user = await _userManager.GetUserAsync(User);
+
+                if (user != null && user.CompanyId != 0)
+                {
+                    ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name");
+                    return View(new Project());
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Projects/Create
@@ -142,21 +151,29 @@ namespace BugEyeD.Controllers
                     // Retrieve the existing project from the database
                     var existingProject = await _context.Projects.FindAsync(project.Id);
 
-                    if (project.ImageFormFile != null)
+                    if (existingProject != null)
                     {
-                        // If a new image is selected, update the image data and file type
-                        project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
-                        project.ImageFileType = project.ImageFormFile.ContentType;
+                        if (project.ImageFormFile != null)
+                        {
+                            // If a new image is selected, update the image data and file type
+                            project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
+                            project.ImageFileType = project.ImageFormFile.ContentType;
+                        }
+                        else
+                        {
+                            // If no new image is selected, retain the existing image
+                            project.ImageFileData = existingProject.ImageFileData;
+                            project.ImageFileType = existingProject.ImageFileType;
+                        }
+
+                        // Update the project with the modified values
+                        _context.Entry(existingProject).CurrentValues.SetValues(project);
+                        await _context.SaveChangesAsync();
                     }
                     else
                     {
-                        // If no new image is selected, retain the existing image
-                        project.ImageFileData = existingProject!.ImageFileData;
-                        project.ImageFileType = existingProject.ImageFileType;
+                        return NotFound();
                     }
-
-                    // Update the project with the modified values
-                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -175,6 +192,7 @@ namespace BugEyeD.Controllers
             ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name", project.ProjectPriorityId);
             return View(project);
         }
+
 
         // GET: Projects/Delete/5
         public async Task<IActionResult> Delete(int? id)
