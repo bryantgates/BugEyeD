@@ -19,6 +19,8 @@ namespace BugEyeD.Models
 		public DateTime StartDate { get; set; }
 		[DataType(DataType.DateTime)]
 		public DateTime EndDate { get; set; }
+
+		[Display(Name = "Project Priority")]
 		public int ProjectPriorityId { get; set; }
 
 		[NotMapped]
