@@ -124,7 +124,7 @@ namespace BugEyeD.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Created,Description,StartDate,EndDate,ProjectPriorityId,ImageFileData,ImageType,ImageFormFile,Archived")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Created,Description,StartDate,EndDate,ProjectPriorityId,ImageFormFile,Archived")] Project project)
         {
             if (id != project.Id)
             {
@@ -139,13 +139,23 @@ namespace BugEyeD.Controllers
                     project.StartDate = DateTime.SpecifyKind(project.StartDate, DateTimeKind.Utc);
                     project.EndDate = DateTime.SpecifyKind(project.EndDate, DateTimeKind.Utc);
 
+                    // Retrieve the existing project from the database
+                    var existingProject = await _context.Projects.FindAsync(project.Id);
+
                     if (project.ImageFormFile != null)
                     {
+                        // If a new image is selected, update the image data and file type
                         project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                         project.ImageFileType = project.ImageFormFile.ContentType;
                     }
+                    else
+                    {
+                        // If no new image is selected, retain the existing image
+                        project.ImageFileData = existingProject!.ImageFileData;
+                        project.ImageFileType = existingProject.ImageFileType;
+                    }
 
-                    _context.Update(project);
+                    // Update the project with the modified values
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -161,6 +171,7 @@ namespace BugEyeD.Controllers
                 }
                 return RedirectToAction(nameof(Details), new { id = project.Id });
             }
+
             ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name", project.ProjectPriorityId);
             return View(project);
         }
@@ -201,7 +212,6 @@ namespace BugEyeD.Controllers
             if (project != null)
             {
                 project.Archived = true;
-                _context.Update(project);
             }
             
             await _context.SaveChangesAsync();

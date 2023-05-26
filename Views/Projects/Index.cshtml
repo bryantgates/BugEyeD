@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<BugEyeD.Models.Project>
 
+@using BugEyeD.Services.Interfaces;
+@using BugEyeD.Models.Enums;
+
+@inject IBTFileService _BTFileService
+
 @{
 	ViewData["Title"] = "Index";
 }
@@ -28,13 +33,7 @@
 				@Html.DisplayNameFor(model => model.EndDate)
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.ImageFileData)
-			</th>
-			<th>
-				@Html.DisplayNameFor(model => model.ImageFileType)
-			</th>
-			<th>
-				@Html.DisplayNameFor(model => model.Archived)
+				@Html.DisplayNameFor(model => model.ImageFormFile)
 			</th>
 			<th>
 				@Html.DisplayNameFor(model => model.Company)
@@ -67,13 +66,7 @@
 						@Html.DisplayFor(modelItem => item.EndDate)
 					</td>
 					<td>
-						@Html.DisplayFor(modelItem => item.ImageFileData)
-					</td>
-					<td>
-						@Html.DisplayFor(modelItem => item.ImageFileType)
-					</td>
-					<td>
-						@Html.DisplayFor(modelItem => item.Archived)
+						<img class="img-fluid" src="@_BTFileService.ConvertByteArrayToFile(item.ImageFileData, item.ImageFileType, DefaultImage.ProjectImage)" alt="Show Image Here" />
 					</td>
 					<td>
 						@Html.DisplayFor(modelItem => item.Company!.Name)
