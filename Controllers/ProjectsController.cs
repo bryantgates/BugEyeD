@@ -55,20 +55,12 @@ namespace BugEyeD.Controllers
             return View(project);
         }
 
-        public async Task<IActionResult> Create()
+
+        [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
+        public IActionResult Create()
         {
-            if (User.IsInRole(nameof(BTRoles.Admin)) || User.IsInRole(nameof(BTRoles.ProjectManager)))
-            {
-                BTUser? user = await _userManager.GetUserAsync(User);
-
-                if (user != null && user.CompanyId != 0)
-                {
-                    ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name");
-                    return View(new Project());
-                }
-            }
-
-            return RedirectToAction(nameof(Index));
+            ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name");
+            return View();
         }
 
         // POST: Projects/Create
