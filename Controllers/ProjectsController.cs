@@ -21,6 +21,7 @@ namespace BugEyeD.Controllers
         private readonly UserManager<BTUser> _userManager;
         private readonly IBTFileService _fileService;
 
+
         public ProjectsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTFileService fileService)
         {
             _context = context;
@@ -31,7 +32,9 @@ namespace BugEyeD.Controllers
         // GET: Projects
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Projects.Include(p => p.Company).Include(p => p.ProjectPriority);
+            BTUser? user = await _userManager.GetUserAsync(User);
+
+            var applicationDbContext = _context.Projects.Where(c => c.CompanyId == user!.CompanyId).Include(p => p.Company).Include(p => p.ProjectPriority);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -43,10 +46,14 @@ namespace BugEyeD.Controllers
                 return NotFound();
             }
 
+            BTUser? user = await _userManager.GetUserAsync(User);
+
             var project = await _context.Projects
+                .Where(c => c.CompanyId == user!.CompanyId)
                 .Include(p => p.Company)
                 .Include(p => p.ProjectPriority)
                 .FirstOrDefaultAsync(m => m.Id == id);
+           
             if (project == null)
             {
                 return NotFound();
@@ -102,6 +109,7 @@ namespace BugEyeD.Controllers
         }
 
         // GET: Projects/Edit/5
+        [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Projects == null)
@@ -109,7 +117,11 @@ namespace BugEyeD.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.FindAsync(id);
+            BTUser? user = await _userManager.GetUserAsync(User);
+
+            var project = await _context.Projects
+                                        .Where(c => c.CompanyId == user!.CompanyId)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null)
             {
@@ -186,7 +198,8 @@ namespace BugEyeD.Controllers
         }
 
 
-        // GET: Projects/Delete/5
+        // GET: Projects/Archive/5
+        [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Projects == null)
@@ -194,7 +207,10 @@ namespace BugEyeD.Controllers
                 return NotFound();
             }
 
+            BTUser? user = await _userManager.GetUserAsync(User);
+
             var project = await _context.Projects
+                .Where(c => c.CompanyId == user!.CompanyId)
                 .Include(p => p.Company)
                 .Include(p => p.ProjectPriority)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -206,8 +222,8 @@ namespace BugEyeD.Controllers
             return View(project);
         }
 
-        // POST: Projects/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // POST: Projects/Archive/5
+        [HttpPost, ActionName("Archive")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
         public async Task<IActionResult> ArchiveConfirmed(int id)
