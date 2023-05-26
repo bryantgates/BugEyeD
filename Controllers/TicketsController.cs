@@ -111,14 +111,16 @@ namespace BugEyeD.Controllers
                 return NotFound();
             }
 
-            var ticket = await _context.Tickets.FindAsync(id);
+            BTUser? user = await _userManager.GetUserAsync(User);
+
+            var ticket = await _context.Tickets.Where(c => c.Project!.CompanyId == user!.CompanyId).FirstOrDefaultAsync(t => t.Id == id);
+           
             if (ticket == null)
             {
                 return NotFound();
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
+
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", ticket.ProjectId);
-            ViewData["SubmitterUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.SubmitterUserId);
             ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id", ticket.TicketPriorityId);
             ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id", ticket.TicketStatusId);
             ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id", ticket.TicketTypeId);
@@ -141,6 +143,9 @@ namespace BugEyeD.Controllers
             {
                 try
                 {
+                    ticket.Created = DateTime.SpecifyKind(ticket.Created, DateTimeKind.Utc);
+                    ticket.Updated = DateTime.UtcNow;
+
                     _context.Update(ticket);
                     await _context.SaveChangesAsync();
                 }

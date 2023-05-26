@@ -165,12 +165,10 @@ namespace BugEyeD.Controllers
                         }
                         else
                         {
-                            // If no new image is selected, retain the existing image
                             project.ImageFileData = existingProject.ImageFileData;
                             project.ImageFileType = existingProject.ImageFileType;
                         }
 
-                        // Update the project with the modified values
                         _context.Entry(existingProject).CurrentValues.SetValues(project);
                         await _context.SaveChangesAsync();
                     }
