@@ -10,6 +10,7 @@ using BugEyeD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Net.Sockets;
+using BugEyeD.Models.Enums;
 
 namespace BugEyeD.Controllers
 {
@@ -29,6 +30,7 @@ namespace BugEyeD.Controllers
         public async Task<IActionResult> Index()
         {
             BTUser? user = await _userManager.GetUserAsync(User);
+            int companyIds = user!.CompanyId;
 
             var applicationDbContext = _context.Tickets.Where(c => c.Project!.CompanyId == user!.CompanyId).Include(t => t.DeveloperUser).Include(t => t.Project).Include(t => t.SubmitterUser).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType);
             return View(await applicationDbContext.ToListAsync());
@@ -86,7 +88,15 @@ namespace BugEyeD.Controllers
             {
                 ticket.Created = DateTime.UtcNow;
 
-                
+                TicketStatus ticketStatus = await _context.TicketStatuses.FirstOrDefaultAsync(t => t.Name == BTTicketStatuses.New.ToString());
+                if (ticketStatus != null)
+                {
+                    ticket.TicketStatusId = ticketStatus.Id;
+                }
+                else
+                {
+                    return View();
+                }
 
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
@@ -120,7 +130,9 @@ namespace BugEyeD.Controllers
                 return NotFound();
             }
 
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", ticket.ProjectId);
+            List<Project> projects = await _context.Projects.Where(c => c.CompanyId == user!.CompanyId).ToListAsync();
+
+            ViewData["ProjectId"] = new SelectList(projects, "Id", "Name");
             ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id", ticket.TicketPriorityId);
             ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id", ticket.TicketStatusId);
             ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id", ticket.TicketTypeId);
@@ -162,9 +174,11 @@ namespace BugEyeD.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", ticket.ProjectId);
-            ViewData["SubmitterUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.SubmitterUserId);
+            BTUser? user = await _userManager.GetUserAsync(User);
+
+            List<Project> projects = await _context.Projects.Where(c => c.CompanyId == user!.CompanyId).ToListAsync();
+
+            ViewData["ProjectId"] = new SelectList(projects, "Id", "Name");
             ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id", ticket.TicketPriorityId);
             ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id", ticket.TicketStatusId);
             ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id", ticket.TicketTypeId);
@@ -172,14 +186,16 @@ namespace BugEyeD.Controllers
         }
 
         // GET: Tickets/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Archive(int? id)
         {
             if (id == null || _context.Tickets == null)
             {
                 return NotFound();
             }
+            BTUser? user = await _userManager.GetUserAsync(User);
 
             var ticket = await _context.Tickets
+                .Where(c => c.Project!.CompanyId == user!.CompanyId)
                 .Include(t => t.DeveloperUser)
                 .Include(t => t.Project)
                 .Include(t => t.SubmitterUser)
@@ -196,9 +212,9 @@ namespace BugEyeD.Controllers
         }
 
         // POST: Tickets/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("Archive")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> ArchiveConfirmed(int id)
         {
             if (_context.Tickets == null)
             {
@@ -207,7 +223,7 @@ namespace BugEyeD.Controllers
             var ticket = await _context.Tickets.FindAsync(id);
             if (ticket != null)
             {
-                _context.Tickets.Remove(ticket);
+                ticket.Archived = true;
             }
             
             await _context.SaveChangesAsync();

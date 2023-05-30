@@ -30,7 +30,7 @@ namespace BugEyeD.Models
 
 		public string? DeveloperUserId { get; set; }
 
-		[Required]
+		/*[Required]*/
 		public string? SubmitterUserId { get; set; }
 
 		// Navigation properties

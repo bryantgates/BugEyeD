@@ -152,14 +152,12 @@ namespace BugEyeD.Controllers
                     project.StartDate = DateTime.SpecifyKind(project.StartDate, DateTimeKind.Utc);
                     project.EndDate = DateTime.SpecifyKind(project.EndDate, DateTimeKind.Utc);
 
-                    // Retrieve the existing project from the database
                     var existingProject = await _context.Projects.FindAsync(project.Id);
 
                     if (existingProject != null)
                     {
                         if (project.ImageFormFile != null)
                         {
-                            // If a new image is selected, update the image data and file type
                             project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                             project.ImageFileType = project.ImageFormFile.ContentType;
                         }
