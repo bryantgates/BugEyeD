@@ -210,28 +210,16 @@ namespace BugEyeD.Controllers
                     project.StartDate = DateTime.SpecifyKind(project.StartDate, DateTimeKind.Utc);
                     project.EndDate = DateTime.SpecifyKind(project.EndDate, DateTimeKind.Utc);
 
-                    var existingProject = await _projectService.GetProjectByIdAsync(project.Id, project.CompanyId);
 
 
-                    if (existingProject != null)
-                    {
                         if (project.ImageFormFile != null)
                         {
                             project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                             project.ImageFileType = project.ImageFormFile.ContentType;
                         }
-                        else
-                        {
-                            project.ImageFileData = existingProject.ImageFileData;
-                            project.ImageFileType = existingProject.ImageFileType;
-                        }
+                    int companyId = User.Identity!.GetCompanyId();
+                    await _projectService.UpdateProjectAsync(project, companyId);
 
-                       await _projectService.UpdateProjectAsync(existingProject, project.CompanyId);
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -247,7 +235,7 @@ namespace BugEyeD.Controllers
                 return RedirectToAction(nameof(Details), new { id = project.Id });
             }
 
-            ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Name", project.ProjectPriorityId);
+            ViewData["ProjectPriorityId"] = new SelectList(await _projectService.GetProjectPrioritiesAsync(), "Id", "Name", project.ProjectPriorityId);
             return View(project);
         }
 
@@ -256,7 +244,7 @@ namespace BugEyeD.Controllers
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Projects == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -268,6 +256,7 @@ namespace BugEyeD.Controllers
                 .Include(p => p.Company)
                 .Include(p => p.ProjectPriority)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (project == null)
             {
                 return NotFound();

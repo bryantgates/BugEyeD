@@ -43,7 +43,16 @@ namespace BugEyeD.Services
         }
         public async Task<List<Ticket>> GetArchivedTicketsAsync(int companyId)
         {
-            return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId && t.Archived == true).ToListAsync();
+            try
+            {
+                return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId && t.Archived == true).ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         public async Task<List<Ticket>> GetTicketsByCompanyIdAsync(int companyId)
         {
@@ -106,7 +115,7 @@ namespace BugEyeD.Services
             }
 
         }
-        
+
         public async Task<List<Ticket>> GetTicketsByUserIdAsync(string userId)
         {
             try

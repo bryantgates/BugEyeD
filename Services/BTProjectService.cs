@@ -229,16 +229,9 @@ namespace BugEyeD.Services
         {
             try
             {
-                var existingProject = await _context.Projects.FirstOrDefaultAsync(p => p.Id == project.Id && p.CompanyId == companyId);
-                if (existingProject != null)
+                if (project.CompanyId == companyId)
                 {
-                    existingProject.Name = project.Name;
-                    existingProject.Description = project.Description;
-                    existingProject.StartDate = project.StartDate;
-                    existingProject.EndDate = project.EndDate;
-                    existingProject.ProjectPriority = project.ProjectPriority;
-
-                    _context.Update(existingProject);
+                    _context.Update(project);
                     await _context.SaveChangesAsync();
                 }
                 else
@@ -252,6 +245,26 @@ namespace BugEyeD.Services
             }
         }
 
+        public async Task<List<Project>> GetUnassaignedProjectsByCompanyIdAsync(int companyId)
+        {
+            try
+            {
+                List<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
+                List<Project> unassignedProjects = new();
 
+                foreach (Project project in allProjects)
+                {
+                    BTUser? projectManager = await GetProjectManagerAsync(project.Id, companyId);
+
+                    if (projectManager is null) unassignedProjects.Add(project);
+                }
+                return unassignedProjects;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }
