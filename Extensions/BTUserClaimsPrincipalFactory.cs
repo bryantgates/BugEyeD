@@ -18,7 +18,7 @@ namespace BugEyeD.Extensions
         {
             ClaimsIdentity identity = await base.GenerateClaimsAsync(user);
 
-            Claim companyClaim = new Claim("CompanyID", user.CompanyId.ToString());
+            Claim companyClaim = new Claim("CompanyId", user.CompanyId.ToString());
             
             identity.AddClaim(companyClaim);
 

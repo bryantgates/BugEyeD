@@ -17,6 +17,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddScoped<IBTFileService, BTFileService>();
+builder.Services.AddScoped<IBTProjectService, BTProjectService>();
+builder.Services.AddScoped<IBTRolesService, BTRolesService>();
+builder.Services.AddScoped<IBTTicketService, BTTicketService>();
+
 builder.Services.AddIdentity<BTUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddClaimsPrincipalFactory<BTUserClaimsPrincipalFactory>()

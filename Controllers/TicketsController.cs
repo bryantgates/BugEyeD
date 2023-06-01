@@ -88,7 +88,7 @@ namespace BugEyeD.Controllers
             {
                 ticket.Created = DateTime.UtcNow;
 
-                TicketStatus ticketStatus = await _context.TicketStatuses.FirstOrDefaultAsync(t => t.Name == BTTicketStatuses.New.ToString());
+                TicketStatus? ticketStatus = await _context.TicketStatuses.FirstOrDefaultAsync(t => t.Name == BTTicketStatuses.New.ToString());
                 if (ticketStatus != null)
                 {
                     ticket.TicketStatusId = ticketStatus.Id;

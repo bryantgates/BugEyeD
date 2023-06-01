@@ -21,7 +21,7 @@ namespace BugEyeD.Data
 		private static int addressbookId;
 
 
-		public static string GetConnectionString(IConfiguration configuration)
+		public static string? GetConnectionString(IConfiguration configuration)
 		{
 			var connectionString = configuration.GetConnectionString("DefaultConnection");
 			var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
