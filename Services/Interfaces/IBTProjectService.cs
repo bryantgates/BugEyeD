@@ -17,5 +17,6 @@ namespace BugEyeD.Services.Interfaces
        public Task<BTUser?> GetProjectManagerAsync(int projectId, int companyId);
        Task<bool> AddProjectManagerAsync(string userId, int projectId, int companyId);
        Task RemoveProjectManagerAsync(int projectId, int companyId);
+       Task<List<Project>> GetUnassignedProjectsByCompanyIdAsync(int companyId);
     }
 }

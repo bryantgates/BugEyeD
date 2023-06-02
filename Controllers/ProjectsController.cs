@@ -37,13 +37,45 @@ namespace BugEyeD.Controllers
         }
 
         // GET: Projects
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            BTUser? user = await _userManager.GetUserAsync(User);
-            int companyId = user!.CompanyId;
+            if (User.IsInRole(nameof(BTRoles.Admin))) return RedirectToAction(nameof(AllProjects));
+            else return RedirectToAction(nameof(MyProjects));
+        }
 
-            var projects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-            return View(projects);
+        public async Task<IActionResult> MyProjects()
+        {
+            List<Project> projects = await _projectService.GetAllUserProjectsAsync(_userManager.GetUserId(User)!);
+
+            ViewData["Title"] = "My Projects";
+            return View(nameof(Index), projects);
+        }
+
+        public async Task<IActionResult> AllProjects()
+        {
+            int companyId = User.Identity!.GetCompanyId();
+            List<Project> projects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+
+            ViewData["Title"] = "All Projects";
+            return View(nameof(Index), projects);
+        }
+
+        public async Task<IActionResult> ArchivedProjects()
+        {
+            int companyId = User.Identity!.GetCompanyId();
+            List<Project> projects = await _projectService.GetArchivedProjectsByCompanyIdAsync(companyId);
+
+            ViewData["Title"] = "Archived Projects";
+            return View(nameof(Index), projects);
+        }
+
+        public async Task<IActionResult> UnassignedProjects()
+        {
+            int companyId = User.Identity!.GetCompanyId();
+            List<Project> projects = await _projectService.GetUnassignedProjectsByCompanyIdAsync(companyId);
+
+            ViewData["Title"] = "Unassigned Projects";
+            return View(nameof(Index), projects);
         }
 
         [HttpGet]

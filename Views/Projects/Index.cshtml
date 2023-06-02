@@ -83,4 +83,43 @@
 			}
 		}
 	</tbody>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			@if (item.Archived)
+			{
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.Name)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.Description)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.Created)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.StartDate)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.EndDate)
+					</td>
+					<td>
+						<img class="img-fluid" src="@_BTFileService.ConvertByteArrayToFile(item.ImageFileData, item.ImageFileType, DefaultImage.ProjectImage)" alt="Show Image Here" />
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.Company!.Name)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.ProjectPriority!.Id)
+					</td>
+					<td>
+						<a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+						<a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+						<a asp-action="Archive" asp-route-id="@item.Id">Archive</a>
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
 </table>

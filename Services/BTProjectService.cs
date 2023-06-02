@@ -10,12 +10,15 @@ namespace BugEyeD.Services
 {
     public class BTProjectService : IBTProjectService
     {
+        private readonly UserManager<BTUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IBTRolesService _rolesService;
-        public BTProjectService(ApplicationDbContext context, IBTRolesService rolesService)
+
+        public BTProjectService(ApplicationDbContext context, IBTRolesService rolesService, UserManager<BTUser> userManager)
         {
             _context = context;
             _rolesService = rolesService;
+            _userManager = userManager;
         }
         public async Task AddProjectAsync(Project project)
         {
