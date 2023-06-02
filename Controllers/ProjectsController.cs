@@ -195,7 +195,7 @@ namespace BugEyeD.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Created,Description,StartDate,EndDate,ProjectPriorityId,ImageFormFile,Archived")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Created,Description,StartDate,EndDate,ProjectPriorityId,ImageFormFile,ImageFileData,ImageFileType,Archived")] Project project)
         {
             if (id != project.Id)
             {
@@ -217,20 +217,14 @@ namespace BugEyeD.Controllers
                             project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                             project.ImageFileType = project.ImageFormFile.ContentType;
                         }
+
                     int companyId = User.Identity!.GetCompanyId();
                     await _projectService.UpdateProjectAsync(project, companyId);
 
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProjectExists(project.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    
                 }
                 return RedirectToAction(nameof(Details), new { id = project.Id });
             }
@@ -242,27 +236,30 @@ namespace BugEyeD.Controllers
 
         // GET: Projects/Archive/5
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Archive(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                int companyId = User.Identity!.GetCompanyId();
+                var project = await _projectService.GetProjectByIdAsync(id.Value, companyId);
+
+                if (project == null)
+                {
+                    return NotFound();
+                }
+
+                return View(project);
             }
-
-            BTUser? user = await _userManager.GetUserAsync(User);
-
-            var project = await _context.Projects
-                .Where(c => c.CompanyId == user!.CompanyId)
-                .Include(p => p.Company)
-                .Include(p => p.ProjectPriority)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (project == null)
+            catch (Exception)
             {
-                return NotFound();
-            }
 
-            return View(project);
+                throw;
+            }
         }
 
         // POST: Projects/Archive/5
@@ -271,25 +268,25 @@ namespace BugEyeD.Controllers
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
         public async Task<IActionResult> ArchiveConfirmed(int id)
         {
-            if (_context.Projects == null)
+            try
             {
-                return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
+                int companyId = User.Identity!.GetCompanyId();
+                var project = await _projectService.GetProjectByIdAsync(id, companyId);
+
+                if (project != null)
+                {
+                    project.Archived = true;
+                }
+
+                await _projectService.ArchiveProjectAsync(project!, companyId);
+                return RedirectToAction(nameof(Index));
             }
-
-            var project = await _context.Projects.FindAsync(id);
-
-            if (project != null)
+            catch (Exception)
             {
-                project.Archived = true;
+
+                throw;
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
-        private bool ProjectExists(int id)
-        {
-          return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
     }
 }

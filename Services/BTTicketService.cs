@@ -93,25 +93,14 @@ namespace BugEyeD.Services
 
         public async Task UpdateTicketAsync(Ticket ticket, int companyId)
         {
-            try
+            if (await _context.Projects.AnyAsync(p => p.CompanyId == companyId && p.Id == ticket.ProjectId))
             {
-                var existingTicket = await GetTicketByIdAsync(ticket.Id, companyId);
-                if (existingTicket != null)
-                {
-                    existingTicket.Title = ticket.Title;
-                    existingTicket.Description = ticket.Description;
-                    existingTicket.TicketTypeId = ticket.TicketTypeId;
-                    existingTicket.TicketStatusId = ticket.TicketStatusId;
-                    existingTicket.TicketPriorityId = ticket.TicketPriorityId;
-
-                    await _context.SaveChangesAsync();
-                }
-
+                _context.Update(ticket);
+                await _context.SaveChangesAsync();
             }
-            catch (Exception)
+            else
             {
-
-                throw;
+                throw new InvalidOperationException("Project not found");
             }
 
         }
@@ -161,6 +150,11 @@ namespace BugEyeD.Services
 
                 throw;
             }
+        }
+
+        public async Task<List<TicketStatus>> GetTicketStatuses()
+        {
+            return await _context.TicketStatuses.ToListAsync();
         }
     }
 }

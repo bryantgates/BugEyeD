@@ -245,7 +245,7 @@ namespace BugEyeD.Services
             }
         }
 
-        public async Task<List<Project>> GetUnassaignedProjectsByCompanyIdAsync(int companyId)
+        public async Task<List<Project>> GetUnassignedProjectsByCompanyIdAsync(int companyId)
         {
             try
             {
