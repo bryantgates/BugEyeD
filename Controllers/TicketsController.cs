@@ -14,6 +14,8 @@ using BugEyeD.Models.Enums;
 using BugEyeD.Services;
 using System.ComponentModel.Design;
 using BugEyeD.Services.Interfaces;
+using BugEyeD.Extensions;
+using BugEyeD.Models.ViewModels;
 
 namespace BugEyeD.Controllers
 {
@@ -24,17 +26,21 @@ namespace BugEyeD.Controllers
         private readonly UserManager<BTUser> _userManager;
         private readonly IBTTicketService _ticketService;
         private readonly IBTProjectService _projectService;
+		private readonly IBTRolesService _rolesService;
+        private readonly IBTTicketHistoryService _ticketHistoryService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService)
-        {
-            _context = context;
-            _userManager = userManager;
-            _ticketService = ticketService;
-            _projectService = projectService;
-        }
+		public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTRolesService rolesService, IBTTicketHistoryService ticketHistoryService)
+		{
+			_context = context;
+			_userManager = userManager;
+			_ticketService = ticketService;
+			_projectService = projectService;
+			_rolesService = rolesService;
+			_ticketHistoryService = ticketHistoryService;
+		}
 
-        // GET: Tickets
-        public async Task<IActionResult> Index()
+		// GET: Tickets
+		public async Task<IActionResult> Index()
         {
             BTUser? user = await _userManager.GetUserAsync(User);
             int companyId = user!.CompanyId;
@@ -64,8 +70,9 @@ namespace BugEyeD.Controllers
             return View(ticket);
         }
 
-        // GET: Tickets/Create
-        public async Task<IActionResult> Create()
+
+		// GET: Tickets/Create
+		public async Task<IActionResult> Create()
         {
             BTUser? user = await _userManager.GetUserAsync(User);
             int companyId = user!.CompanyId;
@@ -85,31 +92,31 @@ namespace BugEyeD.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,Description,TicketTypeId,TicketPriorityId,ProjectId")] Ticket ticket)
         {
+            ModelState.Remove(nameof(Ticket.SubmitterUserId));
+
             if (ModelState.IsValid)
             {
-                ticket.Created = DateTime.UtcNow;
+				int companyId = User.Identity!.GetCompanyId();
+
+				ticket.Created = DateTime.UtcNow;
+                ticket.SubmitterUserId = _userManager.GetUserId(User);
+
                 List<TicketStatus> ticketStatuses = await _ticketService.GetTicketStatuses();
 
-                TicketStatus ticketStatus = ticketStatuses.FirstOrDefault(ts => ts.Name == BTTicketStatuses.New.ToString());
+				TicketStatus ticketStatus = ticketStatuses.FirstOrDefault(ts => ts.Name == BTTicketStatuses.New.ToString());
 
-
-                if (ticketStatus != null)
-                {
-                    ticket.TicketStatusId = ticketStatus.Id;
-                }
-                else
-                {
-                    return View();
-                }
 
                 await _ticketService.AddTicketAsync(ticket);
+
+				await _ticketHistoryService.AddHistoryAsync(null, ticket, _userManager.GetUserId(User)!);
+
                 return RedirectToAction(nameof(Index));
             }
 
-            BTUser? user = await _userManager.GetUserAsync(User);
-            int companyId = user!.CompanyId;
+			BTUser? user = await _userManager.GetUserAsync(User);
+			
 
-            List<Project> projects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            List<Project> projects = await _projectService.GetAllProjectsByCompanyIdAsync(User.Identity!.GetCompanyId());
 
             ViewData["ProjectId"] = new SelectList(projects, "Id", "Name");
             ViewData["TicketPriorityId"] = new SelectList(await _ticketService.GetTicketPriorities(), "Id", "Name");
@@ -166,7 +173,11 @@ namespace BugEyeD.Controllers
                     ticket.Created = DateTime.SpecifyKind(ticket.Created, DateTimeKind.Utc);
                     ticket.Updated = DateTime.UtcNow;
 
-                    await _ticketService.UpdateTicketAsync(ticket, companyId);
+					Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, User.Identity!.GetCompanyId());
+
+
+
+					await _ticketService.UpdateTicketAsync(ticket, companyId);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -186,8 +197,70 @@ namespace BugEyeD.Controllers
             return View(ticket);
         }
 
-        // GET: Tickets/Delete/5
-        public async Task<IActionResult> Archive(int? id)
+		public async Task<IActionResult> UnassignedTickets()
+		{
+			int companyId = User.Identity!.GetCompanyId();
+			List<Ticket> tickets = await _ticketService.GetUnassignedTicketsByCompanyIdAsync(companyId);
+
+			ViewData["Title"] = "Unassigned Tickets";
+			return View(nameof(Index), tickets);
+		}
+
+		[HttpGet]
+		[Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
+		public async Task<IActionResult> AssignDev(int? id)
+		{
+			if (id is null or 0)
+			{
+				return NotFound();
+			}
+
+			int companyId = User.Identity!.GetCompanyId();
+
+			Ticket? ticket = await _ticketService.GetTicketByIdAsync(id.Value, companyId);
+
+			if (ticket is null)
+			{
+				return NotFound();
+			}
+
+			List<BTUser> ticketDevelopers = await _rolesService.GetUsersInRoleAsync(nameof(BTRoles.Developer), companyId);
+			BTUser? currentDev = await _ticketService.GetTicketDeveloperAsync(id.Value, companyId);
+
+			AssignDevViewModel viewModel = new AssignDevViewModel()
+			{
+				Ticket = ticket,
+				DevId = currentDev?.Id,
+				DevList = new SelectList(ticketDevelopers, "Id", "FullName", currentDev?.Id)
+			};
+
+			return View(viewModel);
+		}
+
+		[HttpPost]
+		[Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AssignDev(AssignDevViewModel viewModel)
+		{
+			if (viewModel.Ticket?.Id != null)
+			{
+				if (string.IsNullOrEmpty(viewModel.DevId))
+				{
+					await _ticketService.RemoveTicketDeveloperAsync(viewModel.Ticket.Id, User.Identity!.GetCompanyId());
+				}
+				else
+				{
+					await _ticketService.AddTicketDeveloperAsync(viewModel.DevId, viewModel.Ticket.Id, User.Identity!.GetCompanyId());
+				}
+
+				return RedirectToAction(nameof(Details), new { id = viewModel.Ticket!.Id });
+			}
+
+			return BadRequest();
+		}
+
+		// GET: Tickets/Delete/5
+		public async Task<IActionResult> Archive(int? id)
         {
             if (id == null)
             {
@@ -223,5 +296,33 @@ namespace BugEyeD.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-    }
+        public async Task<IActionResult> MyTickets()
+        {
+			List<Ticket> tickets = await _ticketService.GetTicketsByUserIdAsync(_userManager.GetUserId(User)!);
+
+			ViewData["Title"] = "My Tickets";
+			return View(nameof(Index), tickets);
+		}
+
+		public async Task<IActionResult> AllTickets()
+		{
+			int companyId = User.Identity!.GetCompanyId();
+			List<Ticket> tickets = await _ticketService.GetTicketsByCompanyIdAsync(companyId);
+
+			ViewData["Title"] = "All Tickets";
+			return View(nameof(Index), tickets);
+		}
+
+		public async Task<IActionResult> ArchivedTickets()
+		{
+			int companyId = User.Identity!.GetCompanyId();
+			List<Ticket> tickets = await _ticketService.GetArchivedTicketsAsync(companyId);
+
+			ViewData["Title"] = "Archived Tickets";
+			return View(nameof(Index), tickets);
+		}
+
+		
+
+	}
 }

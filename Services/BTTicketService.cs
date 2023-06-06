@@ -3,6 +3,8 @@ using BugEyeD.Data;
 using BugEyeD.Models;
 using BugEyeD.Models.Enums;
 using BugEyeD.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace BugEyeD.Services
@@ -12,17 +14,47 @@ namespace BugEyeD.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IBTRolesService _rolesService;
+		private readonly UserManager<BTUser> _userManager;
 
-        public BTTicketService(ApplicationDbContext context, IBTRolesService rolesService)
-        {
-            _context = context;
-            _rolesService = rolesService;
-        }
+		public BTTicketService(ApplicationDbContext context, IBTRolesService rolesService, UserManager<BTUser> userManager)
+		{
+			_context = context;
+			_rolesService = rolesService;
+			_userManager = userManager;
+		}
 
-        public async Task AddTicketAsync(Ticket ticket)
+		public async Task AddTicketAsync(Ticket ticket)
         {
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
+        }
+        public async Task<bool> AddTicketDeveloperAsync(string userId, int ticketId, int companyId)
+        {
+            try
+            {
+                Ticket? ticket = await _context.Tickets.Include(t => t.Project!.Members).FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+                BTUser? ticketDeveloper = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.CompanyId == companyId);
+
+                if (ticket is not null && ticketDeveloper is not null)
+                {
+                    if (!await _rolesService.IsUserInRole(ticketDeveloper, nameof(BTRoles.Developer))) return false;
+
+                    await RemoveTicketDeveloperAsync(ticketId, companyId);
+
+                    ticket.Project!.Members.Add(ticketDeveloper);
+                    await _context.SaveChangesAsync();
+
+                    return true;
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return false;
         }
 
         public async Task ArchiveTicketAsync(Ticket ticket, int companyId)
@@ -63,7 +95,36 @@ namespace BugEyeD.Services
         {
             return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
         }
-        public async Task<List<TicketType>> GetTicketTypes()
+
+		public async Task<BTUser?> GetTicketDeveloperAsync(int ticketId, int companyId)
+		{
+			try
+			{
+				Ticket? ticket = await _context.Tickets
+												.AsNoTracking()
+												.Include(t => t.Project)
+												.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+				if (ticket is not null)
+				{
+					foreach (BTUser member in ticket.Project!.Members)
+					{
+						if (await _rolesService.IsUserInRole(member, nameof(BTRoles.Developer)))
+						{
+							return member;
+						}
+					}
+				}
+
+				return null;
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
+		public async Task<List<TicketType>> GetTicketTypes()
         {
             return await _context.TicketTypes.ToListAsync();
         }
@@ -156,5 +217,65 @@ namespace BugEyeD.Services
         {
             return await _context.TicketStatuses.ToListAsync();
         }
-    }
+
+		public async Task<List<Ticket>> GetUnassignedTicketsByCompanyIdAsync(int companyId)
+		{
+			try
+			{
+				List<Ticket> allTickets = await GetTicketsByCompanyIdAsync(companyId);
+				List<Ticket> unassignedProjects = new List<Ticket>();
+
+				foreach (Ticket ticket in allTickets)
+				{
+					BTUser? ticketDeveloper = await GetTicketDeveloperAsync(ticket.Id, companyId);
+
+					if (ticketDeveloper is null) unassignedProjects.Add(ticket);
+				}
+				return unassignedProjects;
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
+
+		public async Task<Ticket?> GetTicketAsNoTrackingAsync(int ticketId, int companyId)
+		{
+			return await _context.Tickets
+				.AsNoTracking()
+				.Include(t => t.Project)
+				.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+		}
+
+		public async Task RemoveTicketDeveloperAsync(int ticketId, int companyId)
+		{
+            try
+            {
+				Ticket? ticket = await _context.Tickets
+				                               .Include(t => t.Project)
+                                               .ThenInclude(p => p.Members)
+											   .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+				if (ticket is not null)
+				{
+					foreach (BTUser member in ticket.Project!.Members)
+					{
+						if (await _rolesService.IsUserInRole(member, nameof(BTRoles.Developer)))
+						{
+							ticket.Project.Members.Remove(member);
+						}
+					}
+
+					await _context.SaveChangesAsync();
+				}
+			}
+            catch (Exception)
+            {
+
+                throw;
+            }
+		}
+
+	}
 }

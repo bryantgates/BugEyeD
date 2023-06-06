@@ -7,6 +7,16 @@
 <h1>Ticket Details</h1>
 <div>
     <div class="container-fluid">
+        @if (User.IsInRole("ProjectManager") || User.IsInRole("Admin"))
+        {
+            <div class="col-12">
+                <div class="d-flex flex-column align-items-stretch align-items-lg-end">
+                    <a asp-action="AssignDev" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm">
+                        Manage Ticket Developers
+                    </a>
+                </div>
+            </div>
+        }
         <div class="row gy-2">
             <div class="col-md-12 col">
                 <div class="row col-cols-2 mt-5 bg-secondary">

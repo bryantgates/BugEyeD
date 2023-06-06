@@ -269,5 +269,43 @@ namespace BugEyeD.Services
                 throw;
             }
         }
-    }
+
+		public async Task<List<BTUser>> GetProjectMembersByRoleAsync(int projectId, string roleName, int companyId)
+		{
+			List<BTUser> projectMembers = new List<BTUser>();
+
+			var project = await _context.Projects
+				.FirstOrDefaultAsync(p => p.Id == projectId && p.CompanyId == companyId);
+
+            List<BTRoles> roles = new List<BTRoles>();
+
+
+			if (project != null)
+			{
+				foreach (var member in project.Members)
+				{
+					var userRoles = await _context.UserRoles
+						.Where(r => r.UserId == member.Id && r.RoleId == roleName)
+						.ToListAsync();
+
+					if (userRoles.Any())
+					{
+						projectMembers.Add(member);
+					}
+				}
+			}
+
+			return projectMembers;
+		}
+
+		public Task<bool> AddMemberToProjectAsync(BTUser member, int projectId, int companyId)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<bool> RemoveMemberFromProjectAsync(BTUser member, int projectId, int companyId)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
