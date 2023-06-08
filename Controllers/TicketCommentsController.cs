@@ -7,16 +7,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BugEyeD.Data;
 using BugEyeD.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Net.Sockets;
 
 namespace BugEyeD.Controllers
 {
     public class TicketCommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<BTUser> _userManager;
 
-        public TicketCommentsController(ApplicationDbContext context)
+        public TicketCommentsController(ApplicationDbContext context, UserManager<BTUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: TicketComments
@@ -59,18 +63,27 @@ namespace BugEyeD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Comment,Created,TicketId,UserId")] TicketComment ticketComment)
+        public async Task<IActionResult> Create([Bind("Id,Comment,TicketId,UserId")] TicketComment ticketComment)
         {
             if (ModelState.IsValid)
             {
+                ticketComment.Created = DateTime.UtcNow;
+                ticketComment.UserId = _userManager.GetUserId(User);
+
                 _context.Add(ticketComment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                Ticket? ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketComment.Id);
+
+                return RedirectToAction("Details", "Tickets", new { id = ticket!.Id });
             }
+
             ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
+
             return View(ticketComment);
         }
+
 
         // GET: TicketComments/Edit/5
         public async Task<IActionResult> Edit(int? id)

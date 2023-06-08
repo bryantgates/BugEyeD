@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using BugEyeD.Models;
+using BugEyeD.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BugEyeD.Controllers

@@ -5,6 +5,8 @@ using BugEyeD.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BugEyeD.Extensions;
+using MailKit;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,7 @@ var connectionString = DataUtility.GetConnectionString(builder.Configuration)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseNpgsql(connectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<IBTFileService, BTFileService>();
@@ -22,6 +25,9 @@ builder.Services.AddScoped<IBTProjectService, BTProjectService>();
 builder.Services.AddScoped<IBTRolesService, BTRolesService>();
 builder.Services.AddScoped<IBTTicketService, BTTicketService>();
 builder.Services.AddScoped<IBTTicketHistoryService, BTTicketHistoryService>();
+builder.Services.AddScoped<IBTCompanyService, BTCompanyService>();
+builder.Services.AddScoped<IBTInviteService, BTInviteService>();
+builder.Services.AddScoped<IEmailSender, EmailService>();
 
 builder.Services.AddIdentity<BTUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
 	.AddEntityFrameworkStores<ApplicationDbContext>()
@@ -30,6 +36,8 @@ builder.Services.AddIdentity<BTUser, IdentityRole>(options => options.SignIn.Req
 	.AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<MailService>(builder.Configuration);
 
 builder.Services.AddScoped<IBTFileService, BTFileService>();
 

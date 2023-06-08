@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Invites\ProcessInvites.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\big5-added.json" />
     <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\cp936.json" />
     <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\cp949.json" />
@@ -24,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.5" />
@@ -31,6 +36,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.6" />
+    <PackageReference Include="MimeKit" Version="4.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
   </ItemGroup>
 
@@ -78,6 +84,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Views\Invites\ProcessInvites.cshtml" />
     <None Include="wwwroot\assets\libs\gulp-minify\node_modules\arr-diff\index.js" />
     <None Include="wwwroot\assets\libs\gulp-minify\node_modules\arr-union\index.js" />
     <None Include="wwwroot\assets\libs\gulp-minify\node_modules\array-slice\index.js" />
@@ -134,6 +141,14 @@
     <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\lib\streams.js" />
     <None Include="wwwroot\assets\libs\treeview\node_modules\jquery\external\sizzle\sizzle.min.js" />
     <None Include="wwwroot\assets\libs\treeview\node_modules\jquery\jquery.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Invites\ProcessInvites.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Invites\ProcessInvites.cshtml" />
   </ItemGroup>
 
 </Project>

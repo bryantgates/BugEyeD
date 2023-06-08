@@ -28,19 +28,21 @@ namespace BugEyeD.Controllers
         private readonly IBTProjectService _projectService;
 		private readonly IBTRolesService _rolesService;
         private readonly IBTTicketHistoryService _ticketHistoryService;
+        private readonly IBTFileService _fileService;
 
-		public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTRolesService rolesService, IBTTicketHistoryService ticketHistoryService)
-		{
-			_context = context;
-			_userManager = userManager;
-			_ticketService = ticketService;
-			_projectService = projectService;
-			_rolesService = rolesService;
-			_ticketHistoryService = ticketHistoryService;
-		}
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTRolesService rolesService, IBTTicketHistoryService ticketHistoryService, IBTFileService fileService)
+        {
+            _context = context;
+            _userManager = userManager;
+            _ticketService = ticketService;
+            _projectService = projectService;
+            _rolesService = rolesService;
+            _ticketHistoryService = ticketHistoryService;
+            _fileService = fileService;
+        }
 
-		// GET: Tickets
-		public async Task<IActionResult> Index()
+        // GET: Tickets
+        public async Task<IActionResult> Index()
         {
             BTUser? user = await _userManager.GetUserAsync(User);
             int companyId = user!.CompanyId;
@@ -103,8 +105,9 @@ namespace BugEyeD.Controllers
 
                 List<TicketStatus> ticketStatuses = await _ticketService.GetTicketStatuses();
 
-				TicketStatus ticketStatus = ticketStatuses.FirstOrDefault(ts => ts.Name == BTTicketStatuses.New.ToString());
+                TicketStatus? ticketStatus = ticketStatuses.FirstOrDefault(ts => ts.Name == BTTicketStatuses.New.ToString());
 
+                ticket.TicketStatusId = ticketStatus!.Id;
 
                 await _ticketService.AddTicketAsync(ticket);
 
@@ -322,7 +325,33 @@ namespace BugEyeD.Controllers
 			return View(nameof(Index), tickets);
 		}
 
-		
 
-	}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTicketAttachment([Bind("Id,FormFile,Description,TicketId")] TicketAttachment ticketAttachment)
+        {
+            string statusMessage;
+
+            ModelState.Remove("UserId");
+
+            if (!ModelState.IsValid && ticketAttachment.FormFile != null)
+            {
+                ticketAttachment.FileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.FormFile);
+                ticketAttachment.FileType = ticketAttachment.FormFile.ContentType;
+
+                ticketAttachment.Created = DateTime.UtcNow;
+                ticketAttachment.BTUserId = _userManager.GetUserId(User);
+
+                await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
+                statusMessage = "Success! A new Attachment added to ticket";
+            }
+            else
+            {
+                statusMessage = "Error: Invalid data.";
+            }
+
+            return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
+        }
+
+    }
 }

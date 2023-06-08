@@ -93,7 +93,13 @@ namespace BugEyeD.Services
 
         public async Task<Ticket?> GetTicketByIdAsync(int ticketId, int companyId)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+            return await _context.Tickets
+                                 .Include(t => t.Project)
+                                 .Include(t => t.Comments)
+                                    .ThenInclude(c => c.User)
+                                 .Include(t => t.Attachments)
+                                 .Include(t => t.History)
+                                 .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
         }
 
 		public async Task<BTUser?> GetTicketDeveloperAsync(int ticketId, int companyId)
@@ -277,5 +283,34 @@ namespace BugEyeD.Services
             }
 		}
 
-	}
+        public async Task AddTicketAttachmentAsync(TicketAttachment ticketAttachment)
+        {
+            try
+            {
+                await _context.AddAsync(ticketAttachment);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task AddTicketCommentAsync(TicketComment comment)
+        {
+            try
+            {
+
+                _context.TicketComments.Add(comment);
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+    }
 }

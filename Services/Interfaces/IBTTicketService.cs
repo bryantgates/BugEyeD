@@ -21,6 +21,8 @@ namespace BugEyeD.Services.Interfaces
         Task<Ticket?> GetTicketAsNoTrackingAsync(int ticketId, int companyId);
         Task<bool> AddTicketDeveloperAsync(string userId, int ticketId, int companyId);
         Task RemoveTicketDeveloperAsync(int ticketId, int companyId);
-	}
+        public Task AddTicketAttachmentAsync(TicketAttachment ticketAttachment);
+        Task AddTicketCommentAsync(TicketComment comment);
+    }
 }
 
