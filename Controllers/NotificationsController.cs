@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BugEyeD.Data;
 using BugEyeD.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BugEyeD.Controllers
 {
-    public class NotificationsController : Controller
+	[Authorize(Policy = "NoAccess")]
+	public class NotificationsController : Controller
     {
         private readonly ApplicationDbContext _context;
 

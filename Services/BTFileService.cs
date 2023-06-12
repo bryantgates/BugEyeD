@@ -5,10 +5,10 @@ namespace BugEyeD.Services
 {
     public class BTFileService : IBTFileService
     {
-        private readonly string _defaultImage = "/img/BEDDefault.png";
-        private readonly string _defaultBTUserImageSrc = "/img/BEDDefaultUser.png";
-        private readonly string _defaultCompanyImageSrc = "/img/BEDDefaultCompany.png";
-        private readonly string _defaultProjectImageSrc = "/img/BEDDefaultProject.png";
+        private readonly string _defaultImage = "~/img/BEDDefault.png";
+        private readonly string _defaultBTUserImageSrc = "~/img/BEDDefaultUser.png";
+        private readonly string _defaultCompanyImageSrc = "~/img/BEDDefaultCompany.png";
+        private readonly string _defaultProjectImageSrc = "~/img/BEDDefaultProject.png";
 
         public string ConvertByteArrayToFile(byte[]? fileData, string? extension, DefaultImage defaultImage)
         {

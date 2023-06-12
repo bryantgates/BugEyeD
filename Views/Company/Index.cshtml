@@ -1,42 +1,28 @@
 ﻿@model BugEyeD.Models.Company
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Index";
 }
+<div class="row">
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-center">@Model.Name</h5>
+                <p class="card-text text-left">@Model.Description</p>
+            </div>
+            <div class="card-footer">
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-action="" class="btn btn-primary">Role Management</a>
+                    <a asp-action="" class="btn btn-secondary">Invite Members</a>
+                }
+            </div>
+        </div>
+    </div>
 
-<h1>Details</h1>
-
-<div>
-    <h4>Company</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageFileData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageFileData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageFileType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageFileType)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="col-md-4">
+        <div class="card">
+            <img @*IMAGE SERVICE HERE*@ class="card-img-top" alt="Company Image">
+        </div>
+    </div>
 </div>
