@@ -22,12 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="wwwroot\assets\libs\treeview\node_modules\jquery\AUTHORS.txt" />
-    <Content Include="wwwroot\assets\libs\treeview\node_modules\jquery\external\sizzle\LICENSE.txt" />
-    <Content Include="wwwroot\assets\libs\treeview\node_modules\jquery\LICENSE.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.5" />
