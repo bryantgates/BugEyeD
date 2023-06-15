@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container.  Postgres
 var connectionString = DataUtility.GetConnectionString(builder.Configuration) 
 	?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
