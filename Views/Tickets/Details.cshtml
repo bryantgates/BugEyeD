@@ -101,10 +101,9 @@
                                     {
                                         <div class="comment-respond">
                                             <h4 class="title">Post a comment</h4>
-                                            <form method="post" asp-action="Create" asp-controller="TicketComments" asp-route-id="@Model.Id" id="commentForm">
+                                            <form method="post" asp-action="Create" asp-controller="TicketComments" id="commentForm">
 
                                                 <input type="hidden" name="TicketId" value="@Model.Id" />
-                                                <input type="hidden" name="UserId" value="@User.Identity.Name" />
 
                                                 <div class="row row-md-10">
                                                     <div class="col-12">

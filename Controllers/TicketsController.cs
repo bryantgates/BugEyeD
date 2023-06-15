@@ -273,12 +273,14 @@ namespace BugEyeD.Controllers
             int companyId = user!.CompanyId;
 
             var ticket = await _ticketService.GetTicketByIdAsync(id.Value, companyId);
-            if (ticket == null)
+            if (ticket != null)
             {
-                return NotFound();
+                ticket.Archived = true;
             }
 
-            return View(ticket);
+            await _ticketService.UpdateTicketAsync(ticket, companyId);
+
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Tickets/Delete/5

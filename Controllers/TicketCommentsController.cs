@@ -63,8 +63,9 @@ namespace BugEyeD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Comment,TicketId,UserId")] TicketComment ticketComment)
+        public async Task<IActionResult> Create([Bind("Id,Comment,TicketId")] TicketComment ticketComment)
         {
+            ModelState.Remove("UserId");
             if (ModelState.IsValid)
             {
                 ticketComment.Created = DateTime.UtcNow;
@@ -73,9 +74,9 @@ namespace BugEyeD.Controllers
                 _context.Add(ticketComment);
                 await _context.SaveChangesAsync();
 
-                Ticket? ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketComment.Id);
+                
 
-                return RedirectToAction("Details", "Tickets", new { id = ticket!.Id });
+                return RedirectToAction("Details", "Tickets", new { id = ticketComment!.TicketId });
             }
 
             ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);

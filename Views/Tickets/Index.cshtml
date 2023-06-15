@@ -4,98 +4,73 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<style>
+    .thick-border {
+        border-width: 50px;
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table table-responsive">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Created)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Updated)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Archived)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ArchivedByProject)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Project)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TicketPriority)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TicketType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TicketStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DeveloperUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SubmitterUser)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Created)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Updated)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Archived)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ArchivedByProject)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Project.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TicketPriority.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TicketType.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TicketStatus.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeveloperUser.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SubmitterUser.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Archive" asp-route-id="@item.Id">Archive</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    .dark-card {
+        background-color: #292929;
+    }
+</style>
+
+<div class="card dark-card">
+    <div class="card-body">
+        <h1 class="card-title text-center">Tickets</h1>
+
+        <p>
+            <a asp-action="Create" class="btn btn-success">Create New</a>
+        </p>
+
+        <div class="row">
+            @foreach (var item in Model)
+                if (!item.Archived)
+            {
+                <div class="col-md-4">
+                    <div class="card mb-3 border border-dark thick-border">
+                        <div class="card-body">
+                            <h5 class="card-title">@Html.DisplayFor(modelItem => item.Title)</h5>
+                            <p class="card-text">@Html.DisplayFor(modelItem => item.Description)</p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col">
+                                    <small class="text-muted">Created: @Html.DisplayFor(modelItem => item.Created)</small>
+                                        <small class="text-muted">Updated: @Html.DisplayFor(modelItem => item.Updated)</small>
+                                </div>
+                                <div class="col text-end">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">Details</a>
+
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#archiveModal-@item.Id">Archive</button>
+                                    }
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="archiveModal-@item.Id" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="archiveModalLabel">Confirm Archive</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to archive this ticket?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <a asp-action="Archive" asp-route-id="@item.Id" class="btn btn-danger">Confirm</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
