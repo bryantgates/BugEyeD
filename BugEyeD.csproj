@@ -5,23 +5,23 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-BugEyeD-28a1c68e-f268-4d81-8cef-91003141b833</UserSecretsId>
+	  <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\assets\libs\pdfmake\**" />
+    <Content Remove="wwwroot\assets\libs\pdfmake\**" />
+    <EmbeddedResource Remove="wwwroot\assets\libs\pdfmake\**" />
+    <None Remove="wwwroot\assets\libs\pdfmake\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Remove="Views\Invites\ProcessInvites.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\big5-added.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\cp936.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\cp949.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\cp950.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\eucjp.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\gb18030-ranges.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\gbk-added.json" />
-    <Content Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\tables\shiftjis.json" />
     <Content Include="wwwroot\assets\libs\treeview\node_modules\jquery\AUTHORS.txt" />
     <Content Include="wwwroot\assets\libs\treeview\node_modules\jquery\external\sizzle\LICENSE.txt" />
     <Content Include="wwwroot\assets\libs\treeview\node_modules\jquery\LICENSE.txt" />
@@ -69,7 +69,6 @@
     <Folder Include="wwwroot\assets\libs\minimist\test\" />
     <Folder Include="wwwroot\assets\libs\moment\src\" />
     <Folder Include="wwwroot\assets\libs\multiselect\test\" />
-    <Folder Include="wwwroot\assets\libs\pdfmake\src\" />
     <Folder Include="wwwroot\assets\libs\postcss\node_modules\" />
     <Folder Include="wwwroot\assets\libs\raphael\dev\test\" />
     <Folder Include="wwwroot\assets\libs\selectize\less\plugins\" />
@@ -126,19 +125,6 @@
     <None Include="wwwroot\assets\libs\gulp-rtlcss\node_modules\rtlcss\lib\util.js" />
     <None Include="wwwroot\assets\libs\gulp-rtlcss\node_modules\strip-json-comments\index.js" />
     <None Include="wwwroot\assets\libs\gulp-rtlcss\node_modules\strip-json-comments\license" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\dbcs-codec.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\dbcs-data.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\index.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\internal.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\sbcs-codec.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\sbcs-data-generated.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\sbcs-data.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\utf16.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\utf32.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\encodings\utf7.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\lib\bom-handling.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\lib\index.js" />
-    <None Include="wwwroot\assets\libs\pdfmake\node_modules\iconv-lite\lib\streams.js" />
     <None Include="wwwroot\assets\libs\treeview\node_modules\jquery\external\sizzle\sizzle.min.js" />
     <None Include="wwwroot\assets\libs\treeview\node_modules\jquery\jquery.min.js" />
   </ItemGroup>
